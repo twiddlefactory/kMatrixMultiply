@@ -1,0 +1,72 @@
+macrodef mult_and_accumulate(roughworkreg,a,b,c,d,e,f)
+	multsab $roughworkreg,$a,$b
+	add $c,$roughworkreg,$c
+	add mp $d,$d,mhi
+	add mp $e,$e,smhi
+	add mp $f,$f,smhi		
+macroend
+macrodef load_counter_from_queue(a,b)
+	qtoscr
+	nop
+	nop
+	move $a,#scr
+	sub $a,$a,#1
+	qtoscr
+	nop
+	nop
+	move $b,#scr
+	sub mp $b,$b,#0
+macroend
+macrodef load_counter_from_queue_and_print(a,b)
+	qtoscr
+	nop
+	nop
+	move $a,#scr arrtoq
+	sub $a,$a,#1
+	qtoscr
+	nop
+	nop
+	move $b,#scr arrtoq
+	sub mp $b,$b,#0
+macroend
+macrodef load_loop_counter(a,b)
+	move $a,$a arrtoscr
+	nop
+	cntpush 0
+	nop
+	scrtocntlo
+	move $b,$b arrtoscr
+	nop
+	nop
+	scrtocnthi	
+macroend
+macrodef init_reg(a,b,c,d,e)
+	addxz $a,#0
+	addxz $b,#0
+	addxz $c,#0
+	addxz $d,#0
+	addxz $e,#0
+macroend
+macrodef process_element(a,b,c,d,e,f,g,h)
+	qtoscr
+	nop
+	nop
+	read($b)
+	move $c,mdr
+	move $d,#scr
+	mult_and_accumulate($a,$c,$d,$e,$f,$g,$h)	
+macroend
+macrodef move_out_row(u,v,a,b,c,d)	
+	move r$a,l$a
+	move r$b,l$b
+	move r$c,l$c
+	move r$d,l$d
+	load_loop_counter($u,$v)
+	beginloopscr
+		move l$a,r$a arrtoq
+		move l$b,r$b arrtoq
+		move l$c,r$c arrtoq
+		move l$d,r$d arrtoq
+	endloop	
+macroend
+	

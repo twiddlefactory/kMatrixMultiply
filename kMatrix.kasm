@@ -1,0 +1,60 @@
+;;;;;;;;;Accumulation registers are l1,l2,l3,l4;;;;;;;;;;;;;;;
+;; All registers specified in LSB,MSB format ;;;;;;;;;;;;;;;;;
+;;;; Size of N stored in l20,l21 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Size of H stored in l22,l23 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Size of M stored in l24,l25 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Reg 0 is data entry line ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Reg 15 is counter ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Reg 19 is zero reg ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+include macros.kasm
+
+start:
+bsclearm
+begincond
+	
+	;;;;;;;;;;; Load the dimensions of matrices;;;;;;;;;;;
+	;;Load size of N
+	load_counter_from_queue_and_print(l20,l21)
+	;;Load size of H
+	load_counter_from_queue(l22,l23)
+	;;Load size of M
+	load_counter_from_queue_and_print(l24,l25)
+	;;;;;;;;;;;;;;;;;;;;; Done ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+	;;If one dimension is zero, skip all this ;;;;;;;;;;;;
+	addxz l20,l20 sltc l19
+	addxz l19,l19 sltc l21 cmpswap bscondright
+	nop
+	nop
+	fbaco, bscondleft, jumpwor end
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	
+	;;;; Load the elements of matrix B into SRAM ;;;;;;;;;
+	load_loop_counter(l22,l23)
+	beginloopscr
+		load_loop_counter(l24,l25)
+		beginloopscr
+			move r0,l0 qtoarr	
+		endloop
+		addxz l0,l0 write(l19)
+		add l19,l19,#1
+	endloop
+	;;;;;;;;;;;;;;;;;;;;; Done ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+	;;; Read values of A in and process ;;;;;;;;;;;;;;;;;;
+	load_loop_counter(l20,l21)
+	beginloopscr
+		load_loop_counter(l22,l23)
+		;; Initialize all registers ;;
+		init_reg(l15,l1,l2,l3,l4)
+		beginloopscr
+			process_element(l31,l15,l17,l18,l1,l2,l3,l4)
+			add l15,l15,#1			
+		endloop
+		move_out_row(l24,l25,1,2,3,4)
+	endloop
+	;;;;;;;;;;;;;;;;;;;; Done ;;;;;;;;;;;;;;;;;;;;;;;;;;;; 	
+	
+endcond
+end:

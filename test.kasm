@@ -1,0 +1,7 @@
+start:
+bsclearm
+	addxz l0,#45
+	addxz l1,#244
+	multsab l2,l0,l1
+	move l3,mhi
+end:
